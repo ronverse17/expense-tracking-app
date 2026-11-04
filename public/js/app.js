@@ -1,5 +1,5 @@
 import { api } from "./api.js";
-import { renderDashboard, updateSelects } from "./render.js";
+import { clearCategoryFilter, previewDonutCategory, renderDashboard, toggleCategoryFilter, updateSelects } from "./render.js";
 import { money, monthLabel } from "./format.js";
 
 const $ = (selector) => document.querySelector(selector);
@@ -12,6 +12,7 @@ let dashboard = null;
 let categories = [];
 let entryKind = "expense";
 let toastTimer;
+let refreshSequence = 0;
 
 monthInput.value = currentMonth;
 
@@ -80,22 +81,58 @@ function setMonth(month) {
   if (!/^\d{4}-\d{2}$/.test(month)) return;
   currentMonth = month;
   monthInput.value = month;
+  clearCategoryFilter();
   refresh();
 }
 
 async function refresh() {
+  const sequence = ++refreshSequence;
+  const requestedMonth = currentMonth;
   try {
-    const [data, allCategories] = await Promise.all([api.dashboard(currentMonth), api.categories()]);
+    const [data, allCategories] = await Promise.all([api.dashboard(requestedMonth), api.categories()]);
+    if (sequence !== refreshSequence || requestedMonth !== currentMonth) return;
     dashboard = data;
     categories = allCategories;
     renderDashboard(data);
     updateSelects(categories);
-    $("#overview-month-label").innerHTML = `${monthLabel(currentMonth)} <span>⌄</span>`;
+    $("#overview-month-label").innerHTML = `${monthLabel(requestedMonth)} <span>⌄</span>`;
     $("#statement-marker").value = data.statement_marker || "";
   } catch (error) {
+    if (sequence !== refreshSequence) return;
     toast(error.message);
   }
 }
+
+function categoryIdFromDonutEvent(event) {
+  const path = event.target.closest("[data-category-id]");
+  return path ? Number(path.dataset.categoryId) : null;
+}
+
+$("#spending-donut").addEventListener("pointermove", (event) => {
+  previewDonutCategory(categoryIdFromDonutEvent(event));
+});
+$("#spending-donut").addEventListener("pointerleave", () => previewDonutCategory(null));
+$("#spending-donut").addEventListener("click", (event) => {
+  const categoryId = categoryIdFromDonutEvent(event);
+  if (categoryId) toggleCategoryFilter(categoryId);
+});
+$("#spending-donut").addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" && event.key !== " ") return;
+  const categoryId = categoryIdFromDonutEvent(event);
+  if (!categoryId) return;
+  event.preventDefault();
+  toggleCategoryFilter(categoryId);
+});
+$("#category-legend").addEventListener("click", (event) => {
+  const button = event.target.closest("[data-category-id]");
+  if (button) toggleCategoryFilter(Number(button.dataset.categoryId));
+});
+$("#category-legend").addEventListener("pointerover", (event) => {
+  const button = event.target.closest("[data-category-id]");
+  if (button) previewDonutCategory(Number(button.dataset.categoryId));
+});
+$("#category-legend").addEventListener("pointerleave", () => previewDonutCategory(null));
+$("#clear-category-filter").addEventListener("click", clearCategoryFilter);
 
 function openEntry(entry = null) {
   const form = $("#entry-form");

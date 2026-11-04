@@ -47,15 +47,15 @@
       <section class="dashboard-grid">
         <article class="panel spending-panel">
           <div class="panel-heading"><div><h2>Spending overview</h2><p>Where your money went this month</p></div><button class="period-chip" id="overview-month-label">This month <span>⌄</span></button></div>
-          <div class="spending-content"><div class="donut-wrap"><div class="donut" id="spending-donut"><div class="donut-center"><strong id="donut-total">₹0</strong><span>net spending</span></div></div></div><div class="category-legend" id="category-legend"></div></div>
-          <div class="chart-bottom"><span class="chart-note"><i></i> Category breakdown</span><a href="#budgets" class="text-link">View budgets <span>↗</span></a></div>
+          <div class="spending-content"><div class="donut-wrap"><div class="donut" id="spending-donut" role="group" aria-label="Spending by category chart. Hover or click a segment, or use the category buttons to filter activity."><svg class="donut-svg" id="donut-svg" viewBox="0 0 300 230" aria-hidden="true"><g id="donut-sides"></g><g id="donut-segments"></g><g id="donut-labels"></g></svg><div class="donut-center"><strong id="donut-total">₹0</strong><span id="donut-caption">net spending</span></div></div></div><div class="category-legend" id="category-legend"></div></div>
+          <div class="chart-bottom"><span class="chart-note"><i></i><span id="chart-note-text">Category breakdown · choose a category to filter activity</span></span><div class="chart-links"><button id="clear-category-filter" class="clear-filter hidden" type="button">Clear filter ×</button><a href="#budgets" class="text-link">View budget <span>↗</span></a></div></div>
         </article>
       </section>
 
       <section class="lower-grid">
         <article class="panel activity-panel" id="activity">
           <div class="panel-heading activity-heading"><div><h2>Recent activity</h2><p>Your latest entries</p></div><button id="add-entry-open" class="button button-primary"><span>＋</span> Add entry</button></div>
-          <div class="activity-table-wrap"><table class="activity-table"><thead><tr><th>ENTRY</th><th>TYPE</th><th>CATEGORY</th><th>AMOUNT</th><th></th></tr></thead><tbody id="entry-list"></tbody></table><div class="empty-state hidden" id="entry-empty"><div class="empty-icon">↗</div><strong>No entries yet</strong><span>Add your first income, expense, or savings entry.</span></div></div>
+          <div class="activity-table-wrap"><table class="activity-table"><thead><tr><th>ENTRY</th><th>TYPE</th><th>CATEGORY</th><th>AMOUNT</th><th></th></tr></thead><tbody id="entry-list"></tbody></table><div class="empty-state hidden" id="entry-empty"><div class="empty-icon">↗</div><strong id="entry-empty-title">No entries yet</strong><span id="entry-empty-copy">Add your first income, expense, or savings entry.</span></div></div>
         </article>
         <aside class="right-rail">
           <article class="panel checkpoint-panel"><div class="checkpoint-icon">⌁</div><div class="checkpoint-title-row"><div><h2>Statement checkpoint</h2><p>Pick up where you left off</p></div><span class="live-tag">PRIVATE</span></div><textarea id="statement-marker" rows="3" placeholder="e.g. Checked through 12 Oct · HDFC statement"></textarea><button id="save-marker" class="button button-secondary">Save checkpoint <span>→</span></button><div class="checkpoint-foot"><span class="lock-icon">▣</span> Saved locally on this device</div></article>

@@ -15,11 +15,58 @@ let toastTimer;
 
 monthInput.value = currentMonth;
 
+const navLinks = [...document.querySelectorAll(".nav-item")];
+const navSections = navLinks
+  .map((link) => ({ link, section: document.querySelector(link.getAttribute("href")) }))
+  .filter(({ section }) => section);
+
+function updateActiveNavigation() {
+  const marker = window.scrollY + Math.min(window.innerHeight * 0.35, 220);
+  let current = navSections[0];
+  for (const item of navSections) {
+    if (item.section.getBoundingClientRect().top + window.scrollY <= marker) current = item;
+  }
+  const atPageBottom = window.scrollY > 0 && window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 3;
+  if (atPageBottom) current = navSections[navSections.length - 1];
+
+  navSections.forEach(({ link }) => {
+    const active = link === current?.link;
+    link.classList.toggle("active", active);
+    if (active) link.setAttribute("aria-current", "location");
+    else link.removeAttribute("aria-current");
+  });
+  if (current) {
+    const icon = current.link.querySelector(".nav-icon")?.textContent || "";
+    $("#breadcrumb-current").textContent = current.link.textContent.replace(icon, "").trim();
+  }
+}
+
+let navFramePending = false;
+function scheduleNavigationUpdate() {
+  if (navFramePending) return;
+  navFramePending = true;
+  requestAnimationFrame(() => {
+    navFramePending = false;
+    updateActiveNavigation();
+  });
+}
+
+window.addEventListener("scroll", scheduleNavigationUpdate, { passive: true });
+window.addEventListener("resize", scheduleNavigationUpdate);
 document.querySelector(".nav-list").addEventListener("click", (event) => {
-  const link = event.target.closest(".nav-item");
-  if (!link) return;
-  document.querySelectorAll(".nav-item").forEach((item) => item.classList.toggle("active", item === link));
+  const clickedLink = event.target.closest(".nav-item");
+  const clickedSection = navSections.find(({ link }) => link === clickedLink);
+  if (clickedSection) {
+    navSections.forEach(({ link }) => {
+      const active = link === clickedSection.link;
+      link.classList.toggle("active", active);
+      if (active) link.setAttribute("aria-current", "location");
+      else link.removeAttribute("aria-current");
+    });
+    $("#breadcrumb-current").textContent = clickedLink.textContent.replace(clickedLink.querySelector(".nav-icon")?.textContent || "", "").trim();
+  }
 });
+updateActiveNavigation();
 
 function toast(message) {
   const node = $("#toast");

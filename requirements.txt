@@ -1,0 +1,2 @@
+# Python packages: none. The app uses only Python's standard library.
+# Supported Python runtime: >=3.11 (also declared in pyproject.toml).

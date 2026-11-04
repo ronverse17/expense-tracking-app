@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0d0f14">
+  <script>try { document.documentElement.dataset.theme = localStorage.getItem("paisa-theme") || "dark"; } catch { document.documentElement.dataset.theme = "dark"; }</script>
   <title>Paisa — Personal finance, in focus</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +30,7 @@
     <main class="main-content" id="top">
       <header class="topbar">
         <div class="breadcrumb">Workspace <span>/</span> <strong id="breadcrumb-current">Overview</strong></div>
-        <div class="top-actions"><button id="export-btn" class="button button-quiet"><span>⇩</span> Export CSV</button><button class="icon-button" id="theme-note" title="Dark theme">◐</button><div class="avatar avatar-small">R</div></div>
+        <div class="top-actions"><button id="export-btn" class="button button-quiet"><span>⇩</span> Export CSV</button><button class="icon-button" id="theme-toggle" title="Switch to light theme" aria-label="Switch to light theme">◐</button><div class="avatar avatar-small">R</div></div>
       </header>
 
       <section class="page-heading" id="overview">

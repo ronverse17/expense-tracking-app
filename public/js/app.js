@@ -16,6 +16,22 @@ let refreshSequence = 0;
 
 monthInput.value = currentMonth;
 
+const themeToggle = $("#theme-toggle");
+function applyTheme(theme, persist = false) {
+  const activeTheme = theme === "light" ? "light" : "dark";
+  document.documentElement.dataset.theme = activeTheme;
+  const switchTo = activeTheme === "dark" ? "light" : "dark";
+  themeToggle.innerHTML = activeTheme === "dark" ? "&#9728;" : "&#9790;";
+  themeToggle.title = `Switch to ${switchTo} theme`;
+  themeToggle.setAttribute("aria-label", `Switch to ${switchTo} theme`);
+  document.querySelector('meta[name="theme-color"]').content = activeTheme === "dark" ? "#0d0f14" : "#f4f6fb";
+  if (persist) {
+    try { localStorage.setItem("paisa-theme", activeTheme); } catch { /* Theme still applies for this session. */ }
+  }
+}
+applyTheme(document.documentElement.dataset.theme);
+themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark", true));
+
 const navLinks = [...document.querySelectorAll(".nav-item")];
 const navSections = navLinks
   .map((link) => ({ link, section: document.querySelector(link.getAttribute("href")) }))

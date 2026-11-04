@@ -15,7 +15,7 @@ export const api = {
   addEntry: (body) => request("/api/entries", { method: "POST", body: JSON.stringify(body) }),
   updateEntry: (id, body) => request(`/api/entries/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
   deleteEntry: (id) => request(`/api/entries/${id}`, { method: "DELETE" }),
-  archiveCategory: (id, month) => request(`/api/categories/${id}`, { method: "PATCH", body: JSON.stringify({ month }) }),
+  setCategoryActive: (id, active, month) => request(`/api/categories/${id}`, { method: "PATCH", body: JSON.stringify({ active, month }) }),
   saveBudget: (body) => request("/api/budgets", { method: "POST", body: JSON.stringify(body) }),
   savePreferences: (body) => request("/api/preferences", { method: "POST", body: JSON.stringify(body) }),
 };

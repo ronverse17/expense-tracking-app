@@ -110,8 +110,9 @@ class Handler(SimpleHTTPRequestHandler):
                     return self.send_json({"error": "A month is required"}, 400)
                 totals = {r["kind"]: r["total"] or 0 for r in db.execute("SELECT kind, SUM(amount_paise) total FROM entries WHERE month=? GROUP BY kind", (month,))}
                 category_rows = db.execute("""
-                    SELECT c.id, c.name, c.color, COALESCE(SUM(e.amount_paise),0) total,
-                    COALESCE(b.amount_paise,0) budget
+                    SELECT c.id, c.name, c.color, c.active,
+                    EXISTS(SELECT 1 FROM entries history WHERE history.category_id=c.id) OR EXISTS(SELECT 1 FROM budgets old_budget WHERE old_budget.category_id=c.id) has_history,
+                    COALESCE(SUM(e.amount_paise),0) total, COALESCE(b.amount_paise,0) budget
                     FROM categories c LEFT JOIN entries e ON e.category_id=c.id AND e.month=? AND e.kind='expense'
                     LEFT JOIN budgets b ON b.category_id=c.id AND b.month=?
                     GROUP BY c.id ORDER BY total DESC, c.name
@@ -215,12 +216,23 @@ class Handler(SimpleHTTPRequestHandler):
         with connect() as db:
             if path.startswith("/api/categories/"):
                 category_id = int(path.rsplit("/", 1)[1])
-                month = datetime.now().strftime("%Y-%m")
+                month = str(data.get("month", ""))
+                current_month = datetime.now().strftime("%Y-%m")
+                if month != current_month:
+                    return self.send_json({"error": "Categories can only be managed while viewing the current month."}, 409)
+                active = bool(data.get("active", False))
+                if active:
+                    db.execute("UPDATE categories SET active=1 WHERE id=?", (category_id,))
+                    return self.send_json({"ok": True})
                 total = db.execute("SELECT COALESCE(SUM(amount_paise),0) total FROM entries WHERE category_id=? AND month=? AND kind='expense'", (category_id, month)).fetchone()["total"]
                 if total != 0:
                     return self.send_json({"error": "This category has a non-zero total this month and cannot be removed."}, 409)
+                history_count = db.execute("SELECT (SELECT COUNT(*) FROM entries WHERE category_id=?) + (SELECT COUNT(*) FROM budgets WHERE category_id=?)", (category_id, category_id)).fetchone()[0]
+                if history_count == 0:
+                    db.execute("DELETE FROM categories WHERE id=?", (category_id,))
+                    return self.send_json({"deleted": True})
                 db.execute("UPDATE categories SET active=0 WHERE id=?", (category_id,))
-                return self.send_json({"ok": True})
+                return self.send_json({"archived": True})
             if path.startswith("/api/entries/"):
                 entry_id = int(path.rsplit("/", 1)[1])
                 old = db.execute("SELECT * FROM entries WHERE id=?", (entry_id,)).fetchone()

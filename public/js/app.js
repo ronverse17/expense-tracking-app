@@ -254,17 +254,24 @@ $("#entry-list").addEventListener("click", async (event) => {
 });
 
 $("#category-manage-list").addEventListener("click", async (event) => {
-  const button = event.target.closest("[data-archive-category]");
+  const button = event.target.closest("[data-category-active]");
   if (!button) return;
   if (currentMonth !== `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`) {
-    toast("Categories can only be removed while viewing the current month");
+    toast("Categories can only be managed while viewing the current month");
     return;
   }
-  const category = categories.find((c) => c.id === Number(button.dataset.archiveCategory));
-  if (!window.confirm(`Remove “${category?.name}” from active categories? Previous month history will be kept.`)) return;
+  const categoryId = Number(button.dataset.categoryId);
+  const category = categories.find((c) => c.id === categoryId);
+  const active = button.dataset.categoryActive === "true";
+  const message = active
+    ? `Restore "${category?.name}" to active categories? Its previous history will be kept.`
+    : category?.has_history
+      ? `Move "${category?.name}" to History? Its saved entries will be kept.`
+      : `Permanently delete "${category?.name}"? This category has no saved entries.`;
+  if (!window.confirm(message)) return;
   try {
-    await api.archiveCategory(button.dataset.archiveCategory, currentMonth);
-    toast("Category moved to history");
+    const result = await api.setCategoryActive(categoryId, active, currentMonth);
+    toast(active ? "Category restored" : result.deleted ? "Category deleted" : "Category moved to history");
     refresh();
   } catch (error) { toast(error.message); }
 });

@@ -48,7 +48,7 @@ function renderCategories(categories) {
   document.querySelector("#chart-note-text").textContent = selected ? `Activity filtered to ${selected.name}` : "Category breakdown · choose a category to filter activity";
   document.querySelector("#clear-category-filter").classList.toggle("hidden", !selected);
   renderDonutCenter(total, positive);
-  document.querySelector("#category-manage-list").innerHTML = categories.map((c) => `<div class="manage-row"><i class="manage-dot" style="background:${escapeHTML(c.color)}"></i><span>${escapeHTML(c.name)}</span>${c.active ? `<button data-archive-category="${c.id}" title="Remove from active categories">×</button>` : `<span class="archived-label">History</span>`}</div>`).join("") || `<span class="legend-empty">Create your first category.</span>`;
+  document.querySelector("#category-manage-list").innerHTML = categories.map((c) => `<div class="manage-row"><i class="manage-dot" style="background:${escapeHTML(c.color)}"></i><span>${escapeHTML(c.name)}</span>${c.active ? `<button data-category-active="false" data-category-id="${c.id}" title="${c.has_history ? "Move to History" : "Delete category"}" aria-label="${c.has_history ? "Move to History" : "Delete"} ${escapeHTML(c.name)}">&#215;</button>` : `<span class="archived-label">History</span><button data-category-active="true" data-category-id="${c.id}" title="Restore category" aria-label="Restore ${escapeHTML(c.name)}">&#8634;</button>`}</div>`).join("") || `<span class="legend-empty">Create your first category.</span>`;
 }
 
 function pointAt(cx, cy, radius, angle, verticalScale = 0.7, depth = 0) {
